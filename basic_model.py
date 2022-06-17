@@ -13,13 +13,15 @@ from tensorflow.keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Co
 from tensorflow.keras.optimizers import Adam
 
 #Load data and labels
-data_filename = "path to data file"
-label_filename  = "path to label file"
+data_filename = "C:/Users/Natal/Documents/CABI/ML/Vessel data/fadus_subvol/fadus_deconv_subvol.npy"
+label_filename  = "C:/Users/Natal/Documents/CABI/ML/Vessel data/fadus_subvol/fadus_deconv_subvol_labels.npy"
+print('Loading labels from '+str(data_filename))
 X = np.load(data_filename)
-Y=np.load(label_filename)
+y = np.load(label_filename)
+X = X[0:y.shape[0],:,:]
 
 #Split into training and test images
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size = 0.25)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25)
 
 #Define Model
 inputs = Input((X_train.shape[1],X_train.shape[2], 1))
