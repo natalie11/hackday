@@ -36,29 +36,29 @@ X_train, X_test, y_train, y_test = train_test_split(X_pad, y_pad, test_size = 0.
 inputs = Input((X_train.shape[1],X_train.shape[2], 1))
 
 #Encoding branch
-conv1 = Conv2D(32, (3,3), activation='relu')(inputs)
-conv1 = Conv2D(32, (3,3), activation='relu')(conv1)
+conv1 = Conv2D(32, (3,3), activation='relu', padding='same')(inputs)
+conv1 = Conv2D(32, (3,3), activation='relu', padding='same')(conv1)
 pool1 = MaxPooling2D(pool_size=(2,2))(conv1)
 drop1 = Dropout(0.25)(pool1)
 
-conv2 = Conv2D(64, (3,3),activation='relu')(drop1)
-conv2 = Conv2D(64, (3,3), activation='relu')(conv2)
+conv2 = Conv2D(64, (3,3),activation='relu', padding='same')(drop1)
+conv2 = Conv2D(64, (3,3), activation='relu', padding='same')(conv2)
 pool2 = MaxPooling2D(pool_size=(2,2))(conv2)
 drop2 = Dropout(0.25)(pool2)
 
-conv3=Conv2D(128, (3,3), activation='relu')(drop2)
-conv3=Conv2D(64, (3,3), activation='relu')(conv3)
+conv3=Conv2D(128, (3,3), activation='relu', padding='same')(drop2)
+conv3=Conv2D(64, (3,3), activation='relu', padding='same')(conv3)
 
-up4 = Conv2DTranspose(64, (2,2), strides=(2,2))(conv3)
+up4 = Conv2DTranspose(64, (2,2), strides=(2,2), padding='same')(conv3)
 concat4 = concatenate([up4, conv2], axis=3)
-conv4 = Conv2D(64, (3,3), activation='relu')(concat4)
+conv4 = Conv2D(64, (3,3), activation='relu', padding='same')(concat4)
 drop4 = Dropout(0.25)(conv4)
 
-up5 = Conv2DTranspose(32, (2,2), strides=(2,2))(conv4)
+up5 = Conv2DTranspose(32, (2,2), strides=(2,2), padding='same')(conv4)
 concat5 = concatenate([up5, conv1], axis=3)
-conv5 = Conv2D(32, (3,3), activation='relu')(concat5)
+conv5 = Conv2D(32, (3,3), activation='relu', padding='same')(concat5)
 
-outputs = Conv2D(2, (1,1,1), activation='softmax')(conv5)
+outputs = Conv2D(2, (1,1), activation='softmax')(conv5)
 
 model = Model(inputs=[inputs], outputs=[outputs])
 
