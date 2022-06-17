@@ -62,6 +62,6 @@ outputs = Conv2D(2, (1,1), activation='softmax')(conv5)
 
 model = Model(inputs=[inputs], outputs=[outputs])
 
-model.compile(optimizer=Adam(learning_rate=0.0001),loss='binary_crossentropy',metric='accuracy')
+model.compile(optimizer=Adam(learning_rate=0.0001),loss='binary_crossentropy',metrics='accuracy')
 
-model.fit(X=X_train, y=y_train, batch_size=8,epochs=5)
+model.fit(x=X_train, y=y_train, batch_size=8,epochs=5)
