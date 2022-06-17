@@ -12,6 +12,27 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import to_categorical
+K=tf.keras.backend
+
+#Custom metric
+def precision(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true[...,1] * y_pred[...,1], 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred[...,1], 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    return precision
+
+def recall(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true[...,1] * y_pred[...,1], 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true[...,1], 0, 1)))
+    recall = true_positives / (possible_positives + K.epsilon())
+    return recall
+
+def dice(y_true, y_pred):
+    P = precision(y_true, y_pred)
+    R = recall(y_true, y_pred)
+    dice = 2*(P*R)/(P+R+K.epsilon())
+    return dice
+
 
 #Load data and labels
 data_filename = "C:/Users/Natal/Documents/CABI/ML/Vessel data/fadus_subvol/fadus_deconv_subvol.npy"
@@ -70,6 +91,6 @@ outputs = Conv2D(2, (1,1), activation='softmax')(conv5)
 model = Model(inputs=[inputs], outputs=[outputs])
 
 #Compile model with optimiser, loss function etc.
-model.compile(optimizer=Adam(learning_rate=0.0001),loss='binary_crossentropy',metrics='accuracy')
+model.compile(optimizer=Adam(learning_rate=0.0001),loss='binary_crossentropy',metrics=['accuracy', precision, recall, dice])
 
-model.fit(x=X_train, y=y_train, batch_size=8,epochs=5)
+model.fit(x=X_train, y=y_train, batch_size=8,epochs=5, validation_data=(X_test, y_test))
