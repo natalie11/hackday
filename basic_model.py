@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, Dropout
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.utils import to_categorical
 
 #Load data and labels
 data_filename = "C:/Users/Natal/Documents/CABI/ML/Vessel data/fadus_subvol/fadus_deconv_subvol.npy"
@@ -20,11 +21,15 @@ X = np.load(data_filename)
 y = np.load(label_filename)
 X = X[0:y.shape[0],:,:]
 
-
+#Pad to make a nice shape for convolutions
 X_pad=np.zeros([X.shape[0],512,512])
 y_pad=np.zeros([X.shape[0],512,512])
 X_pad[:, 3:509, :]=X[:,:,12:524]
 y_pad[:, 3:509, :]=y[:,:,12:524]
+
+#reshape and one hot encode the labels
+X_pad=X_pad.reshape(*X_pad.shape, 1)
+y_pad=to_categorical(y_pad, 2)
 
 print("Shape of X:" +str(X_pad.shape))
 print("Shape of y:" +str(y_pad.shape))
@@ -49,6 +54,7 @@ drop2 = Dropout(0.25)(pool2)
 conv3=Conv2D(128, (3,3), activation='relu', padding='same')(drop2)
 conv3=Conv2D(64, (3,3), activation='relu', padding='same')(conv3)
 
+#Decoding branch
 up4 = Conv2DTranspose(64, (2,2), strides=(2,2), padding='same')(conv3)
 concat4 = concatenate([up4, conv2], axis=3)
 conv4 = Conv2D(64, (3,3), activation='relu', padding='same')(concat4)
@@ -58,10 +64,12 @@ up5 = Conv2DTranspose(32, (2,2), strides=(2,2), padding='same')(conv4)
 concat5 = concatenate([up5, conv1], axis=3)
 conv5 = Conv2D(32, (3,3), activation='relu', padding='same')(concat5)
 
+#Classifier
 outputs = Conv2D(2, (1,1), activation='softmax')(conv5)
 
 model = Model(inputs=[inputs], outputs=[outputs])
 
+#Compile model with optimiser, loss function etc.
 model.compile(optimizer=Adam(learning_rate=0.0001),loss='binary_crossentropy',metrics='accuracy')
 
 model.fit(x=X_train, y=y_train, batch_size=8,epochs=5)
