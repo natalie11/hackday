@@ -26,6 +26,9 @@ y_pad=np.zeros([X.shape[0],512,512])
 X_pad[:, 3:509, :]=X[:,:,12:524]
 y_pad[:, 3:509, :]=y[:,:,12:524]
 
+print("Shape of X:" +str(X_pad.shape))
+print("Shape of y:" +str(y_pad.shape))
+
 #Split into training and test images
 X_train, X_test, y_train, y_test = train_test_split(X_pad, y_pad, test_size = 0.25)
 
