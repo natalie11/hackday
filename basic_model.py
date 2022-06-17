@@ -20,8 +20,14 @@ X = np.load(data_filename)
 y = np.load(label_filename)
 X = X[0:y.shape[0],:,:]
 
+
+X_pad=np.zeros([X.shape[0],512,512])
+y_pad=np.zeros([X.shape[0],512,512])
+X_pad[:, 3:509, :]=X[:,:,12:524]
+y_pad[:, 3:509, :]=y[:,:,12:524]
+
 #Split into training and test images
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25)
+X_train, X_test, y_train, y_test = train_test_split(X_pad, y_pad, test_size = 0.25)
 
 #Define Model
 inputs = Input((X_train.shape[1],X_train.shape[2], 1))
@@ -43,7 +49,7 @@ conv3=Conv2D(64, (3,3), activation='relu')(conv3)
 up4 = Conv2DTranspose(64, (2,2), strides=(2,2))(conv3)
 concat4 = concatenate([up4, conv2], axis=3)
 conv4 = Conv2D(64, (3,3), activation='relu')(concat4)
-drop2 = Dropout(0.25)(conv4)
+drop4 = Dropout(0.25)(conv4)
 
 up5 = Conv2DTranspose(32, (2,2), strides=(2,2))(conv4)
 concat5 = concatenate([up5, conv1], axis=3)
